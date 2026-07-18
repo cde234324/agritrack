@@ -6,6 +6,10 @@ import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
 
+const shouldGenerateWayfinder =
+    process.env.VERCEL !== '1' &&
+    process.env.SKIP_WAYFINDER_GENERATION !== 'true';
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -24,8 +28,12 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        ...(shouldGenerateWayfinder
+            ? [
+                  wayfinder({
+                      formVariants: true,
+                  }),
+              ]
+            : []),
     ],
 });

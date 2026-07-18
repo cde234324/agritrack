@@ -7,6 +7,6 @@ test('the dashboard is publicly available', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('dashboard')
-            ->where('version', 'v1.18'),
+            ->where('version', 'v1.19'),
         );
 });
