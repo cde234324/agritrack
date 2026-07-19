@@ -118,7 +118,7 @@ export default function Login() {
                     <footer className="mt-7 text-center text-sm text-stone-600">
                         <p>© 2026 AGRITRACK. All rights reserved.</p>
                         <p className="mt-1 text-xs text-stone-400">
-                            Version v1.19
+                            Version v1.20
                         </p>
                     </footer>
                 </section>

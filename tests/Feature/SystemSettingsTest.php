@@ -7,6 +7,6 @@ test('system settings is publicly available', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('system-settings')
-            ->where('version', 'v1.19'),
+            ->where('version', 'v1.20'),
         );
 });
