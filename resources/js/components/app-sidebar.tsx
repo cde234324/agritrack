@@ -1,8 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
+import type { InertiaLinkProps } from '@inertiajs/react';
 import {
     BarChart3,
     BookOpen,
     Boxes,
+    ChevronDown,
     ClipboardList,
     FileChartColumn,
     LayoutDashboard,
@@ -14,6 +16,12 @@ import {
     UserCog,
     Users,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
     Sidebar,
     SidebarContent,
@@ -24,6 +32,9 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
     SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
@@ -31,41 +42,84 @@ import { edit as editSystemSettings } from '@/routes/system-settings';
 import { index as userRolesIndex } from '@/routes/user-roles';
 import { index as usersIndex } from '@/routes/users';
 
-const menuItems = [
+type SidebarItem = {
+    title: string;
+    icon: LucideIcon;
+    page?: string;
+    href?: NonNullable<InertiaLinkProps['href']>;
+};
+
+type SidebarSection = {
+    title: string;
+    icon: LucideIcon;
+    items: SidebarItem[];
+};
+
+const menuSections: SidebarSection[] = [
     {
-        title: 'Dashboard',
-        icon: LayoutDashboard,
-        page: 'dashboard',
-        href: dashboard(),
+        title: 'Registry & Mapping',
+        icon: MapPinned,
+        items: [
+            { title: 'Farmer Registry', icon: Users },
+            { title: 'Farm & Land Records', icon: Map },
+            { title: 'GIS Map', icon: MapPinned },
+        ],
     },
-    { title: 'Farmer Registry', icon: Users },
-    { title: 'Farm & Land Records', icon: Map },
-    { title: 'GIS Map', icon: MapPinned },
-    { title: 'Crop Management', icon: Sprout },
-    { title: 'Production Records', icon: ClipboardList },
-    { title: 'Inventory & Inputs', icon: Boxes },
-    { title: 'Market & Price Analytics', icon: BarChart3 },
-    { title: 'Knowledge Hub', icon: BookOpen },
-    { title: 'Reports & Analytics', icon: FileChartColumn },
     {
-        title: 'User Management',
-        icon: UserCog,
-        page: 'users',
-        href: usersIndex(),
+        title: 'Farm Operations',
+        icon: Sprout,
+        items: [
+            { title: 'Crop Management', icon: Sprout },
+            { title: 'Production Records', icon: ClipboardList },
+            { title: 'Inventory & Inputs', icon: Boxes },
+        ],
     },
     {
-        title: 'Role',
+        title: 'Insights & Knowledge',
+        icon: BarChart3,
+        items: [
+            { title: 'Market & Price Analysis', icon: BarChart3 },
+            { title: 'Knowledge Hub', icon: BookOpen },
+            { title: 'Reports & Analytics', icon: FileChartColumn },
+        ],
+    },
+    {
+        title: 'Administration',
         icon: ShieldCheck,
-        page: 'user-roles',
-        href: userRolesIndex(),
-    },
-    {
-        title: 'System Settings',
-        icon: Settings,
-        page: 'system-settings',
-        href: editSystemSettings(),
+        items: [
+            {
+                title: 'User Management',
+                icon: UserCog,
+                page: 'users',
+                href: usersIndex(),
+            },
+            {
+                title: 'Role',
+                icon: ShieldCheck,
+                page: 'user-roles',
+                href: userRolesIndex(),
+            },
+            {
+                title: 'System Settings',
+                icon: Settings,
+                page: 'system-settings',
+                href: editSystemSettings(),
+            },
+        ],
     },
 ];
+
+function isMenuItemActive(component: string, item: SidebarItem): boolean {
+    if (!item.page) {
+        return false;
+    }
+
+    if (item.page === 'users' || item.page === 'user-roles') {
+        return component.startsWith(`${item.page}/`);
+    }
+
+    return component === item.page;
+}
 
 export function AppSidebar() {
     const page = usePage();
@@ -95,40 +149,104 @@ export function AppSidebar() {
                 <SidebarGroup className="p-2">
                     <SidebarGroupContent>
                         <SidebarMenu className="gap-1">
-                            {menuItems.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    {item.page ? (
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={
-                                                item.page === 'users' ||
-                                                item.page === 'user-roles'
-                                                    ? page.component.startsWith(
-                                                          `${item.page}/`,
-                                                      )
-                                                    : page.component ===
-                                                      item.page
-                                            }
-                                            tooltip={item.title}
-                                            className="h-10 rounded-md px-3 text-[13px] text-white data-[active=true]:bg-[#3d8c35] data-[active=true]:font-normal data-[active=true]:text-white data-[active=true]:shadow-sm"
-                                        >
-                                            <Link href={item.href} prefetch>
-                                                <item.icon className="size-[18px]" />
-                                                <span>{item.title}</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    ) : (
-                                        <SidebarMenuButton
-                                            type="button"
-                                            tooltip={item.title}
-                                            className="h-10 rounded-md px-3 text-[13px] font-normal text-white/95 hover:bg-white/10 hover:text-white"
-                                        >
-                                            <item.icon className="size-[18px]" />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    )}
-                                </SidebarMenuItem>
-                            ))}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={page.component === 'dashboard'}
+                                    tooltip="Dashboard"
+                                    className="h-10 rounded-md px-3 text-[13px] text-white data-[active=true]:bg-[#3d8c35] data-[active=true]:font-normal data-[active=true]:text-white data-[active=true]:shadow-sm"
+                                >
+                                    <Link href={dashboard()} prefetch>
+                                        <LayoutDashboard className="size-[18px]" />
+                                        <span>Dashboard</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+
+                            {menuSections.map((section) => {
+                                const hasActiveItem = section.items.some(
+                                    (item) =>
+                                        isMenuItemActive(page.component, item),
+                                );
+
+                                return (
+                                    <Collapsible
+                                        key={`${section.title}-${page.component}`}
+                                        asChild
+                                        defaultOpen={hasActiveItem}
+                                        className="group/collapsible"
+                                    >
+                                        <SidebarMenuItem>
+                                            <CollapsibleTrigger asChild>
+                                                <SidebarMenuButton
+                                                    type="button"
+                                                    tooltip={section.title}
+                                                    className="h-9 rounded-md px-3 text-[11px] font-semibold tracking-[0.08em] text-white/70 uppercase hover:bg-white/10 hover:text-white data-[state=open]:bg-white/5 data-[state=open]:text-white"
+                                                >
+                                                    <section.icon className="size-[17px]" />
+                                                    <span>{section.title}</span>
+                                                    <ChevronDown className="ml-auto size-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden group-data-[state=open]/collapsible:rotate-180" />
+                                                </SidebarMenuButton>
+                                            </CollapsibleTrigger>
+
+                                            <CollapsibleContent>
+                                                <SidebarMenuSub className="mx-4 gap-0.5 border-white/15 px-2 py-1">
+                                                    {section.items.map(
+                                                        (item) => {
+                                                            const isActive =
+                                                                isMenuItemActive(
+                                                                    page.component,
+                                                                    item,
+                                                                );
+
+                                                            return (
+                                                                <SidebarMenuSubItem
+                                                                    key={
+                                                                        item.title
+                                                                    }
+                                                                >
+                                                                    <SidebarMenuSubButton
+                                                                        asChild
+                                                                        isActive={
+                                                                            isActive
+                                                                        }
+                                                                        className="h-9 text-[12px] text-white/90 data-[active=true]:bg-[#3d8c35] data-[active=true]:text-white data-[active=true]:shadow-sm"
+                                                                    >
+                                                                        {item.href ? (
+                                                                            <Link
+                                                                                href={
+                                                                                    item.href
+                                                                                }
+                                                                                prefetch
+                                                                            >
+                                                                                <item.icon className="size-4" />
+                                                                                <span>
+                                                                                    {
+                                                                                        item.title
+                                                                                    }
+                                                                                </span>
+                                                                            </Link>
+                                                                        ) : (
+                                                                            <button type="button">
+                                                                                <item.icon className="size-4" />
+                                                                                <span>
+                                                                                    {
+                                                                                        item.title
+                                                                                    }
+                                                                                </span>
+                                                                            </button>
+                                                                        )}
+                                                                    </SidebarMenuSubButton>
+                                                                </SidebarMenuSubItem>
+                                                            );
+                                                        },
+                                                    )}
+                                                </SidebarMenuSub>
+                                            </CollapsibleContent>
+                                        </SidebarMenuItem>
+                                    </Collapsible>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

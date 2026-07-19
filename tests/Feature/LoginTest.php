@@ -7,6 +7,6 @@ test('the login page is publicly available', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('login')
-            ->where('version', 'v1.20'),
+            ->where('version', 'v1.22'),
         );
 });
